@@ -29,7 +29,6 @@ export default function StationDetails() {
           prices = {};
         }
 
-        // Use consistent mock brand logic based on recordid
         const mockBrands = ["Total", "Esso", "Shell", "BP"];
         const brandIndex = parseInt(f.recordid) % mockBrands.length;
         const brand = f.enseigne || f.nom || mockBrands[brandIndex];
@@ -69,7 +68,7 @@ export default function StationDetails() {
       <TouchableOpacity
         style={{
           marginTop: 20,
-          backgroundColor: "#2563eb",
+          backgroundColor: "075F0F",
           padding: 12,
           borderRadius: 8,
         }}
