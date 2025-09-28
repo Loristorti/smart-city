@@ -7,10 +7,7 @@ export default function Welcome() {
 
   return (
     <View style={styles.container}>
-      {/* Logo + Tagline */}
       <View style={styles.center}>
-        {/* Replace with your actual logo if you have one */}
-        <Text style={styles.logo}>⛽</Text>
         <Text style={styles.title}>SMART FUEL</Text>
         <Text style={styles.subtitle}>SMARTER CHOICES</Text>
       </View>
@@ -42,7 +39,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#2563eb",
+    color: "#418EA7",
   },
   subtitle: {
     fontSize: 16,
@@ -51,7 +48,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   button: {
-    backgroundColor: "#2563eb",
+    backgroundColor: "#418EA7",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",

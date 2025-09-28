@@ -10,15 +10,14 @@ export default function StationList() {
     fetch("https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?limit=100")
       .then((res) => res.json())
       .then((data) => {
+        const mockBrands = ["Total", "Esso", "Shell", "BP"];
+
         const parsed = (data.results || [])
           .map((station) => {
-            const mockBrands = ["Total", "Esso", "Shell", "BP"];
-            const randomBrand = mockBrands[Math.floor(Math.random() * mockBrands.length)];
             const lat = parseFloat(station.latitude) / 100000;
             const lon = parseFloat(station.longitude) / 100000;
             if (!lat || !lon || isNaN(lat) || isNaN(lon)) return null;
 
-            // Parse the prix field (it's a stringified array)
             let prices = {};
             try {
               const parsedPrices = JSON.parse(station.prix || "[]");
@@ -29,10 +28,16 @@ export default function StationList() {
               prices = {};
             }
 
+            const id = station.recordid || "fallback";
+            const brandIndex = id.length % mockBrands.length;
+            const brand = station.enseigne || station.nom || mockBrands[brandIndex];
+
+            const address = (station.adresse || "") + (station.ville ? `, ${station.ville}` : "");
+
             return {
-              id: station.id,
-              brand: station.enseigne || station.nom || randomBrand,
-              address: `${station.adresse || ""}, ${station.ville || ""}`,
+              id,
+              brand,
+              address,
               prices: {
                 diesel: prices["Gazole"] || "N/A",
                 sp95: prices["SP95"] || "N/A",
@@ -58,8 +63,8 @@ export default function StationList() {
 
   return (
     <ScrollView style={{ padding: 16 }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12 }}>
-        Stations disponibles
+      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12, textAlign: "center"  }}>
+        Liste
       </Text>
       {stations.map((s) => (
         <Card key={s.id} id={s.id} brand={s.brand} address={s.address} prices={s.prices} />

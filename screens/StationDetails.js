@@ -9,49 +9,61 @@ export default function StationDetails() {
   const [station, setStation] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!id) return;
+useEffect(() => {
+  if (!id) return;
 
-    fetch(`https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        const f = data.record || {};
-        const lat = parseFloat(f.latitude) / 100000;
-        const lon = parseFloat(f.longitude) / 100000;
+  fetch(`https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?where=recordid="${id}"`)
+    .then((res) => res.json())
+    .then((data) => {
+      const f = data.results?.[0] || {};
+      const lat = parseFloat(f.latitude) / 100000;
+      const lon = parseFloat(f.longitude) / 100000;
 
-        let prices = {};
-        try {
-          const parsedPrices = JSON.parse(f.prix || "[]");
-          parsedPrices.forEach((p) => {
-            prices[p["@nom"]] = p["@valeur"];
-          });
-        } catch (e) {
-          prices = {};
-        }
-
-        // Use consistent mock brand logic based on recordid
-        const mockBrands = ["Total", "Esso", "Shell", "BP"];
-        const brandIndex = parseInt(f.recordid) % mockBrands.length;
-        const brand = f.enseigne || f.nom || mockBrands[brandIndex];
-
-        setStation({
-          brand,
-          address: `${f.adresse || ""}, ${f.ville || ""}`,
-          prices: {
-            diesel: prices["Gazole"] || "N/A",
-            sp95: prices["SP95"] || "N/A",
-            sp98: prices["SP98"] || "N/A",
-          },
-          lat,
-          lon,
+      let prices = {};
+      try {
+        const parsedPrices = JSON.parse(f.prix || "[]");
+        parsedPrices.forEach((p) => {
+          prices[p["@nom"]] = p["@valeur"];
         });
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Details fetch error:", err);
-        setLoading(false);
+      } catch (e) {
+        prices = {};
+      }
+
+      const mockBrands = ["Total", "Shell", "BP", "Esso"];
+      const brandIndex = parseInt(f.recordid || "0", 36) % mockBrands.length;
+      const brand = f.enseigne || f.nom || mockBrands[brandIndex];
+
+      let address = "";
+      if (f.adresse && f.ville) {
+        address = `${f.adresse}, ${f.ville}`;
+      } else if (f.adresse) {
+        address = f.adresse;
+      } else if (f.ville) {
+        address = f.ville;
+      } else {
+        address = "Adresse inconnue";
+      }
+
+      setStation({
+        brand,
+        address,
+        prices: {
+          diesel: prices["Gazole"] || "N/A",
+          sp95: prices["SP95"] || "N/A",
+          sp98: prices["SP98"] || "N/A",
+        },
+        lat,
+        lon,
       });
-  }, [id]);
+      setLoading(false);
+    })
+    .catch((err) => {
+      console.error("Details fetch error:", err);
+      setLoading(false);
+    });
+}, [id]);
+
+
 
   if (loading || !station) {
     return <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#2563eb" />;
@@ -69,7 +81,7 @@ export default function StationDetails() {
       <TouchableOpacity
         style={{
           marginTop: 20,
-          backgroundColor: "#2563eb",
+          backgroundColor: "#075F0F",
           padding: 12,
           borderRadius: 8,
         }}

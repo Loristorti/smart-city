@@ -14,6 +14,7 @@ export default function MapNative() {
     )
       .then((res) => res.json())
       .then((data) => {
+        
         const mockBrands = ["Total", "Shell", "BP", "Esso"];
 
         const parsedStations = (data.results || [])
@@ -25,11 +26,11 @@ export default function MapNative() {
 
             if (!lat || !lon || isNaN(lat) || isNaN(lon)) return null;
 
-            const brandIndex = parseInt(station.id) % mockBrands.length;
+            const brandIndex = parseInt(station.recordid, 36) % mockBrands.length;
             const brand = station.enseigne || station.nom || mockBrands[brandIndex];
 
             return {
-              id: station.id,
+              id: station.recordid,
               lat,
               lon,
               name: brand,
