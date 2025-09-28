@@ -1,12 +1,31 @@
-import React, { useEffect, useState } from "react";
-import MapView, { Marker, Callout } from "react-native-maps";
-import { StyleSheet, View, Text, ActivityIndicator } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import MapView, { Marker, Callout, Polyline } from "react-native-maps";
+import { StyleSheet, View, Text, ActivityIndicator, Button, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import * as Location from "expo-location";
+import polyline from "@mapbox/polyline";
 
 export default function MapNative() {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [location, setLocation] = useState(null);
+  const [routeCoords, setRouteCoords] = useState([]);
+  const mapRef = useRef(null);
   const router = useRouter();
+
+  
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission denied", "Location permission is required.");
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc.coords);
+    })();
+  }, []);
+
 
   useEffect(() => {
     fetch(
@@ -14,7 +33,6 @@ export default function MapNative() {
     )
       .then((res) => res.json())
       .then((data) => {
-        
         const mockBrands = ["Total", "Shell", "BP", "Esso"];
 
         const parsedStations = (data.results || [])
@@ -50,6 +68,37 @@ export default function MapNative() {
       });
   }, []);
 
+  
+  async function fetchRoute(station) {
+    if (!location) {
+      Alert.alert("Wait", "Your location isn’t ready yet");
+      return;
+    }
+    try {
+      const start = `${location.longitude},${location.latitude}`;
+      const end = `${station.lon},${station.lat}`;
+      const url = `https://router.project-osrm.org/route/v1/driving/${start};${end}?overview=full&geometries=polyline`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.routes.length) return;
+
+      const encoded = data.routes[0].geometry;
+      const points = polyline.decode(encoded);
+      const coords = points.map(([lat, lon]) => ({ latitude: lat, longitude: lon }));
+      setRouteCoords(coords);
+
+      if (mapRef.current) {
+        mapRef.current.fitToCoordinates(coords, {
+          edgePadding: { top: 80, right: 40, bottom: 160, left: 40 },
+          animated: true,
+        });
+      }
+    } catch (err) {
+      console.error("Route error:", err);
+    }
+  }
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -62,7 +111,9 @@ export default function MapNative() {
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
+        showsUserLocation={true} 
         initialRegion={{
           latitude: 48.8566,
           longitude: 2.3522,
@@ -70,36 +121,30 @@ export default function MapNative() {
           longitudeDelta: 0.5,
         }}
       >
+    
         {stations.map((s) => (
-          <Marker
-            key={s.id}
-            coordinate={{ latitude: s.lat, longitude: s.lon }}
-          >
+          <Marker key={s.id} coordinate={{ latitude: s.lat, longitude: s.lon }}>
             <Callout onPress={() => router.push(`/station?id=${s.id}`)}>
               <View style={{ width: 200 }}>
                 <Text style={{ fontWeight: "bold" }}>{s.name}</Text>
                 <Text>{s.adresse}, {s.ville}</Text>
-                <Text style={{ color: "#2563eb", marginTop: 4 }}>Voir les détails</Text>
+                <Button title="Itinéraire" onPress={() => fetchRoute(s)} />
               </View>
             </Callout>
           </Marker>
         ))}
+
+       
+        {routeCoords.length > 0 && (
+          <Polyline coordinates={routeCoords} strokeWidth={5} strokeColor="#1E90FF" />
+        )}
       </MapView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
+  container: { flex: 1 },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  map: { width: "100%", height: "100%" },
 });
