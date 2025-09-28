@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
-import MapView, { Marker, Callout, Polyline } from "react-native-maps";
-import { StyleSheet, View, Text, ActivityIndicator, Button, Alert } from "react-native";
-import { useRouter } from "expo-router";
-import * as Location from "expo-location";
 import polyline from "@mapbox/polyline";
+import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Alert, Button, StyleSheet, Text, View } from "react-native";
+import MapView, { Callout, Marker, Polyline } from "react-native-maps";
+import { MaterialCommunityIcons } from "@expo/vector-icons"; 
 
 export default function MapNative() {
   const [stations, setStations] = useState([]);
@@ -19,10 +20,16 @@ export default function MapNative() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Permission denied", "Location permission is required.");
+        setLoading(false); 
         return;
       }
-      const loc = await Location.getCurrentPositionAsync({});
-      setLocation(loc.coords);
+      try {
+        const loc = await Location.getCurrentPositionAsync({});
+        setLocation(loc.coords);
+      } catch (e) {
+        console.error("Could not get location:", e);
+        Alert.alert("Location Error", "Could not retrieve your current location.");
+      }
     })();
   }, []);
 
@@ -74,6 +81,10 @@ export default function MapNative() {
       Alert.alert("Wait", "Your location isn’t ready yet");
       return;
     }
+    
+   
+    setRouteCoords([]); 
+
     try {
       const start = `${location.longitude},${location.latitude}`;
       const end = `${station.lon},${station.lat}`;
@@ -81,13 +92,22 @@ export default function MapNative() {
 
       const res = await fetch(url);
       const data = await res.json();
-      if (!data.routes.length) return;
+      
+      
+      if (!data.routes || data.routes.length === 0) {
+        Alert.alert(
+          "Route Not Found",
+          "Could not find a driving route to this station. The destination may be too far or unreachable."
+        );
+        return;
+      }
 
       const encoded = data.routes[0].geometry;
       const points = polyline.decode(encoded);
       const coords = points.map(([lat, lon]) => ({ latitude: lat, longitude: lon }));
       setRouteCoords(coords);
 
+      
       if (mapRef.current) {
         mapRef.current.fitToCoordinates(coords, {
           edgePadding: { top: 80, right: 40, bottom: 160, left: 40 },
@@ -96,9 +116,11 @@ export default function MapNative() {
       }
     } catch (err) {
       console.error("Route error:", err);
+      Alert.alert("Routing Error", "An error occurred while fetching the route.");
     }
   }
 
+ 
   if (loading) {
     return (
       <View style={styles.center}>
@@ -115,36 +137,82 @@ export default function MapNative() {
         style={styles.map}
         showsUserLocation={true} 
         initialRegion={{
-          latitude: 48.8566,
-          longitude: 2.3522,
+          latitude: location?.latitude || 48.8566,
+          longitude: location?.longitude || 2.3522,
           latitudeDelta: 0.5,
           longitudeDelta: 0.5,
         }}
       >
-    
+      
         {stations.map((s) => (
-          <Marker key={s.id} coordinate={{ latitude: s.lat, longitude: s.lon }}>
-            <Callout onPress={() => router.push(`/station?id=${s.id}`)}>
-              <View style={{ width: 200 }}>
+          <Marker 
+            key={s.id} 
+            coordinate={{ latitude: s.lat, longitude: s.lon }}
+          >
+           
+            <View style={styles.customMarker}>
+              <MaterialCommunityIcons name="gas-station" size={20} color="white" />
+            </View>
+            
+            <Callout> 
+              <View style={styles.calloutContent}>
                 <Text style={{ fontWeight: "bold" }}>{s.name}</Text>
                 <Text>{s.adresse}, {s.ville}</Text>
-                <Button title="Itinéraire" onPress={() => fetchRoute(s)} />
+                
+             
+                <View style={{ marginTop: 5, marginBottom: 5 }}>
+                    <Button 
+                        title="Détails" 
+                        onPress={() => router.push(`/station?id=${s.id}`)} 
+                        color="#4F46E5" 
+                    />
+                </View>
+
+                
+                <Button 
+                    title="Itinéraire" 
+                    onPress={() => fetchRoute(s)} 
+                    color="#2563eb"
+                />
               </View>
             </Callout>
           </Marker>
         ))}
 
-       
+      
         {routeCoords.length > 0 && (
-          <Polyline coordinates={routeCoords} strokeWidth={5} strokeColor="#1E90FF" />
+          <Polyline 
+            coordinates={routeCoords} 
+            strokeWidth={5} 
+            strokeColor="#1E90FF" 
+          />
         )}
       </MapView>
     </View>
   );
 }
 
+
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
   map: { width: "100%", height: "100%" },
+  calloutContent: { 
+    width: 200, 
+    padding: 5 
+  },
+  
+  customMarker: {
+    backgroundColor: '#3b82f6', 
+    padding: 8,
+    borderRadius: 20, 
+    borderWidth: 2,
+    borderColor: 'white',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+  },
 });
