@@ -14,8 +14,8 @@ export default function Map() {
   }, []);
 
   useEffect(() => {
-    fetch("https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?limit=100")
-      .then((res) => res.json())
+    fetch("https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?limit=100")  
+    .then((res) => res.json())
       .then((data) => {
         const stationsRaw = data.records || data.results || [];
         const parsedStations = stationsRaw.map((station) => {

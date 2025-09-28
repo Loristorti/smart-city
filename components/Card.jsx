@@ -1,27 +1,24 @@
-// src/components/Card.jsx
-import { View, Text } from "react-native";
+import { TouchableOpacity, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 
-export default function Card({ brand, address, prices }) {
+export default function Card({ brand, address, prices, id }) {
+  const router = useRouter();
+
   return (
-    <View className="bg-white shadow rounded-lg p-4 mb-4">
-      {/* Header */}
-      <View className="flex-row justify-between items-center mb-2">
-        <Text className="text-lg font-semibold">{brand}</Text>
-        <Text className="text-sm text-gray-500">{address}</Text>
-      </View>
-
-      {/* Prices */}
-      <View className="flex-col gap-1">
-        <Text>
-          Diesel: <Text className="font-medium">{prices.diesel ?? "N/A"} €</Text>
-        </Text>
-        <Text>
-          SP95: <Text className="font-medium">{prices.sp95 ?? "N/A"} €</Text>
-        </Text>
-        <Text>
-          SP98: <Text className="font-medium">{prices.sp98 ?? "N/A"} €</Text>
-        </Text>
-      </View>
-    </View>
+    <TouchableOpacity
+      onPress={() => router.push(`/station?id=${id}`)}
+      style={{
+        padding: 12,
+        marginBottom: 12,
+        backgroundColor: "#f3f4f6",
+        borderRadius: 8,
+      }}
+    >
+      <Text style={{ fontSize: 18, fontWeight: "bold" }}>{brand}</Text>
+      <Text style={{ marginBottom: 4 }}>{address}</Text>
+      <Text>Diesel: {prices.diesel ?? "N/A"} €</Text>
+      <Text>SP95: {prices.sp95 ?? "N/A"} €</Text>
+      <Text>SP98: {prices.sp98 ?? "N/A"} €</Text>
+    </TouchableOpacity>
   );
 }

@@ -1,10 +1,9 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Tabs } from "expo-router";
+import React from "react";
+import { useColorScheme } from "react-native";
+import { Colors } from "@/constants/theme";
+import { HapticTab } from "@/components/haptic-tab";
+import { IconSymbol } from "@/components/ui/icon-symbol";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -12,22 +11,45 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-      }}>
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="welcome"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Welcome",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="sparkles" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="map"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Map",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="map.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="station"
+        options={{
+          title: "Details",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="fuelpump.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="list"
+        options={{
+          title: "List",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="list.bullet" color={color} />
+          ),
         }}
       />
     </Tabs>

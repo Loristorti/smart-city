@@ -1,6 +1,5 @@
-// app/index.js
-import Map from "../components/Map";
+import { Redirect } from "expo-router";
 
-export default function MapScreen() {
-  return <Map />;
+export default function Index() {
+  return <Redirect href="/welcome" />;
 }
