@@ -24,7 +24,7 @@ export default function Station() {
 
   const renderStation = ({ item }) => (
     <View className="flex-row items-center p-4 bg-white rounded-2xl shadow mb-4">
-      {/* Logo */}
+      
       <Image
         source={{ uri: item.logo }}
         className="w-12 h-12 mr-4 rounded-full"
