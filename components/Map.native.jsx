@@ -9,6 +9,8 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Linking,
+  Platform,
 } from "react-native";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -23,7 +25,6 @@ export default function MapNative() {
   const mapRef = useRef(null);
   const router = useRouter();
 
-  
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -42,7 +43,6 @@ export default function MapNative() {
     })();
   }, []);
 
-  
   useEffect(() => {
     fetch(
       "https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?limit=100"
@@ -122,18 +122,27 @@ export default function MapNative() {
 
       const minutes = Math.round(route.duration / 60);
       const km = (route.distance / 1000).toFixed(1);
-      setTravelInfo({ minutes, km });
-
-      if (mapRef.current) {
-        mapRef.current.fitToCoordinates(coords, {
-          edgePadding: { top: 80, right: 40, bottom: 160, left: 40 },
-          animated: true,
-        });
-      }
+      setTravelInfo({ minutes, km, dest: station });
     } catch (err) {
       console.error("Route error:", err);
       Alert.alert("Routing Error", "An error occurred while fetching the route.");
     }
+  }
+
+  function startNavigation(dest) {
+    if (!dest) return;
+    const { lat, lon } = dest;
+
+    let url = "";
+    if (Platform.OS === "ios") {
+      url = `http://maps.apple.com/?daddr=${lat},${lon}`;
+    } else {
+      url = `google.navigation:q=${lat},${lon}`;
+    }
+
+    Linking.openURL(url).catch(() => {
+      Alert.alert("Navigation Error", "Could not open the maps app.");
+    });
   }
 
   if (loading) {
@@ -183,9 +192,18 @@ export default function MapNative() {
           </Text>
 
           {travelInfo && (
-            <Text style={{ marginBottom: 8, color: "#111" }}>
-              🚗 {travelInfo.km} km • ⏱ {travelInfo.minutes} min
-            </Text>
+            <>
+              <Text style={{ marginBottom: 8, color: "#111" }}>
+                🚗 {travelInfo.km} km • ⏱ {travelInfo.minutes} min
+              </Text>
+
+              <TouchableOpacity
+                style={[styles.button, { backgroundColor: "#1E90FF" }]}
+                onPress={() => startNavigation(travelInfo.dest)}
+              >
+                <Text style={styles.buttonText}>Go</Text>
+              </TouchableOpacity>
+            </>
           )}
 
           <TouchableOpacity
