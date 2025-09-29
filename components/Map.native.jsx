@@ -195,7 +195,7 @@ export default function MapNative() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: "#2563eb" }]}
+            style={[styles.button, { backgroundColor: "#00654f" }]}
             onPress={() => fetchRoute(selectedStation)}
           >
             <Text style={styles.buttonText}>Itinéraire</Text>
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   stationName: { fontWeight: "bold", fontSize: 18, marginBottom: 4 },
   stationAddress: { fontSize: 14, color: "#555", marginBottom: 8 },
   button: {
-    backgroundColor: "#4F46E5",
+    backgroundColor: "#075F0F",
     paddingVertical: 10,
     borderRadius: 8,
     marginTop: 8,

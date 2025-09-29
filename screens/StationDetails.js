@@ -2,23 +2,23 @@ import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-
+ 
 export default function StationDetails() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const [station, setStation] = useState(null);
   const [loading, setLoading] = useState(true);
-
+ 
 useEffect(() => {
   if (!id) return;
-
-  fetch(`https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?where=recordid="${id}"`)
+ 
+  fetch(`https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-…${id}"`)
     .then((res) => res.json())
     .then((data) => {
       const f = data.results?.[0] || {};
       const lat = parseFloat(f.latitude) / 100000;
       const lon = parseFloat(f.longitude) / 100000;
-
+ 
       let prices = {};
       try {
         const parsedPrices = JSON.parse(f.prix || "[]");
@@ -28,11 +28,11 @@ useEffect(() => {
       } catch (e) {
         prices = {};
       }
-
+ 
       const mockBrands = ["Total", "Shell", "BP", "Esso"];
       const brandIndex = parseInt(f.recordid || "0", 36) % mockBrands.length;
       const brand = f.enseigne || f.nom || mockBrands[brandIndex];
-
+ 
       let address = "";
       if (f.adresse && f.ville) {
         address = `${f.adresse}, ${f.ville}`;
@@ -43,7 +43,7 @@ useEffect(() => {
       } else {
         address = "Adresse inconnue";
       }
-
+ 
       setStation({
         brand,
         address,
@@ -62,22 +62,22 @@ useEffect(() => {
       setLoading(false);
     });
 }, [id]);
-
-
-
+ 
+ 
+ 
   if (loading || !station) {
     return <ActivityIndicator style={{ marginTop: 40 }} size="large" color="#2563eb" />;
   }
-
+ 
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <Text style={{ fontSize: 24, fontWeight: "bold" }}>{station.brand}</Text>
       <Text style={{ fontSize: 16, marginBottom: 8 }}>{station.address}</Text>
-
+ 
       <Text>Diesel: {station.prices.diesel} €</Text>
       <Text>SP95: {station.prices.sp95} €</Text>
       <Text>SP98: {station.prices.sp98} €</Text>
-
+ 
       <TouchableOpacity
         style={{
           marginTop: 20,

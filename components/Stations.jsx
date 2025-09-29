@@ -1,4 +1,4 @@
-// src/components/Station.jsx
+
 import { View, Text, Image, FlatList, ActivityIndicator } from "react-native";
 import { useStations } from "../hooks/useStations";
 
@@ -30,7 +30,7 @@ export default function Station() {
         className="w-12 h-12 mr-4 rounded-full"
         resizeMode="contain"
       />
-      {/* Info */}
+     
       <View>
         <Text className="font-semibold text-lg">{item.name}</Text>
         <Text className="text-sm text-gray-600">
