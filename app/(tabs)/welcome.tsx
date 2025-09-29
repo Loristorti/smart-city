@@ -1,20 +1,17 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-
-
+ 
+ 
 export default function Welcome() {
   const router = useRouter();
-
+ 
   return (
     <View style={styles.container}>
-      {/* Logo + Tagline */}
       <View style={styles.center}>
-        {/* Replace with your actual logo if you have one */}
-        <Text style={styles.logo}>⛽</Text>
         <Text style={styles.title}>SMART FUEL</Text>
         <Text style={styles.subtitle}>SMARTER CHOICES</Text>
       </View>
-
+ 
       {/* Button */}
       <TouchableOpacity style={styles.button} onPress={() => router.push("/map")}>
         <Text style={styles.buttonText}>Voir la carte</Text>
@@ -22,7 +19,7 @@ export default function Welcome() {
     </View>
   );
 }
-
+ 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -42,7 +39,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#2563eb",
+    color: "#418EA7",
   },
   subtitle: {
     fontSize: 16,
@@ -51,7 +48,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   button: {
-    backgroundColor: "#2563eb",
+    backgroundColor: "#418EA7",
     paddingVertical: 14,
     borderRadius: 8,
     alignItems: "center",
@@ -62,3 +59,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+ 
