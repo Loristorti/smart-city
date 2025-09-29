@@ -12,7 +12,7 @@ export default function StationDetails() {
 useEffect(() => {
   if (!id) return;
  
-  fetch(`https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-…${id}"`)
+fetch(`https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?where=recordid="${id}"`)
     .then((res) => res.json())
     .then((data) => {
       const f = data.results?.[0] || {};
