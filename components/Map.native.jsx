@@ -49,8 +49,6 @@ export default function MapNative() {
     )
       .then((res) => res.json())
       .then((data) => {
-        const mockBrands = ["Total", "Shell", "BP", "Esso"];
-
         const parsedStations = (data.results || [])
           .map((station) => {
             const latRaw = parseFloat(station.latitude);
@@ -60,11 +58,18 @@ export default function MapNative() {
 
             if (!lat || !lon || isNaN(lat) || isNaN(lon)) return null;
 
-            const brandIndex = parseInt(station.recordid, 36) % mockBrands.length;
-            const brand = station.enseigne || station.nom || mockBrands[brandIndex];
+            const brand =
+              station.enseigne ||
+              station.nom ||
+              station.marque ||
+              station.nom_station ||
+              station.ville ||
+              station.adresse ||
+              "Station";
 
             return {
-              id: station.recordid,
+              id: station.id,
+              recordid: station.id,
               lat,
               lon,
               name: brand,
@@ -83,7 +88,6 @@ export default function MapNative() {
         setLoading(false);
       });
   }, []);
-
 
   async function fetchRoute(station) {
     if (!location) {
@@ -116,7 +120,6 @@ export default function MapNative() {
       }));
       setRouteCoords(coords);
 
-     
       const minutes = Math.round(route.duration / 60);
       const km = (route.distance / 1000).toFixed(1);
       setTravelInfo({ minutes, km });
@@ -133,7 +136,6 @@ export default function MapNative() {
     }
   }
 
-  
   if (loading) {
     return (
       <View style={styles.center}>
@@ -173,7 +175,6 @@ export default function MapNative() {
         )}
       </MapView>
 
-      
       {selectedStation && (
         <View style={styles.bottomSheet}>
           <Text style={styles.stationName}>{selectedStation.name}</Text>
@@ -189,7 +190,7 @@ export default function MapNative() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push(`/station?id=${selectedStation.id}`)}
+            onPress={() => router.push(`/station?id=${selectedStation.recordid}`)}
           >
             <Text style={styles.buttonText}>Détails</Text>
           </TouchableOpacity>
